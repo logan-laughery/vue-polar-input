@@ -1,12 +1,12 @@
 {
-  "name": "@stout/vue-polar-input",
+  "name": "@stout/vue-radar-input",
   "version": "0.1.0",
   "private": false,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "bundle": "vue-cli-service build --target lib --name polar-input ./src/components/index.js"
+    "bundle": "vue-cli-service build --target lib --name radar-input ./src/components/index.js"
   },
   "dependencies": {
     "vue": "^2.5.17"
@@ -48,5 +48,5 @@
     "*.json",
     "*.js"
   ],
-  "main": "./dist/polar-input.umd.js"
+  "main": "./dist/radar-input.umd.js"
 }

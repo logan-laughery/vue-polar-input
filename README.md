@@ -1,4 +1,4 @@
-# vue-polar-input
+# vue-radar-input
 
 ## Install / Setup
 (Not currently available)

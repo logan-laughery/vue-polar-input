@@ -1,12 +1,12 @@
 <template>
-  <div class="polar-input">
-    Polar Input Magic Goes Here
+  <div class="radar-input">
+    Radar Input Magic Goes Here
   </div>
 </template>
 
 <script>
 export default {
-  name: 'PolarInput',
+  name: 'RadarInput',
 }
 </script>
 

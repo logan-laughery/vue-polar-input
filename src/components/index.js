@@ -1,8 +1,8 @@
 import Vue from "vue";
-import PolarInput from "./PolarInput.vue";
+import RadarInput from "./RadarInput.vue";
 
 const Components = {
-  PolarInput,
+  RadarInput,
 };
 
 Object.keys(Components).forEach(name => {

@@ -2,10 +2,10 @@
   <div class="hello">
     <h1>{{ msg }}</h1>
     <h3>
-      Polar Input
+      Radar Input
     </h3>
-    <PolarInput>
-    </PolarInput>
+    <RadarInput>
+    </RadarInput>
   </div>
 </template>
 
