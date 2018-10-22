@@ -26,7 +26,10 @@
       "plugin:vue/essential",
       "eslint:recommended"
     ],
-    "rules": {},
+    "rules": {
+      "vue/html-self-closing": "off",
+      "vue/require-v-for-keys": "off"
+    },
     "parserOptions": {
       "parser": "babel-eslint"
     }
