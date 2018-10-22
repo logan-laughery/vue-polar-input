@@ -1,5 +1,5 @@
 import Vue from "vue";
-import RadarInput from "./RadarInput.vue";
+import RadarInput from "./RadarInput/RadarInput.vue";
 
 const Components = {
   RadarInput,
