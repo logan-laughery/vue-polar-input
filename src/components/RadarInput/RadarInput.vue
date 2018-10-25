@@ -1,11 +1,12 @@
 <template>
   <div
     class="radar-input"
-    v-on:mouseup="stopDrag"
+    style="width: 100%"
     v-on:mousemove="drag"
+    v-on:touchmove="touchMove"
   >
     Radar Input Magic Goes Here
-    <svg width="300px" height="300px" viewBox="-40 -40 80 80" ref="svg">
+    <svg width="100%" height="300px" viewBox="-40 -40 80 80" ref="svg">
       <polygon
         :points="interval"
         fill="rgba(0, 0, 0, 0)"
@@ -53,28 +54,6 @@
       >
         {{label.text}}
       </text>
-      <!-- clickable points -->
-      <!-- <template
-        v-for="valuePoints in points"
-      > -->
-        <!-- <circle
-          :cx="valuePoint.x"
-          :cy="valuePoint.y"
-          r="3"
-          fill="#00000000"
-          v-on:click="changeValue(valuePoint.key, valuePoint.value)"
-          :key="valuePoint.key + ' ' + valuePoint.value"
-          v-for="valuePoint in valuePoints"
-        /> -->
-        <!-- <circle
-          :cx="valuePoint.x"
-          :cy="valuePoint.y"
-          r="3"
-          fill="#00000000"
-          :key="valuePoint.key + ' ' + valuePoint.value"
-          v-for="valuePoint in valuePoints"
-        /> -->
-      <!-- </template> -->
       <!-- test line -->
       <!-- <line
         :x1="testLine.x1"
@@ -84,6 +63,14 @@
         stroke="blue"
         stroke-width=".5px"
       /> -->
+      <circle
+        :cx="dragPoint.x"
+        :cy="dragPoint.y"
+        r="1.25"
+        fill="#72a072"
+        :key="'color point' + dragPoint.x + ' ' + dragPoint.y"
+        v-for="dragPoint in dragPoints"
+      />
       <line
         x1="0"
         y1="0"
@@ -94,24 +81,23 @@
         :key="'clickable' + i"
         v-for="(line, i) in lines"
         v-on:mousedown="startDrag($event, i)"
+        v-on:touchstart.prevent="startTouchDrag($event, i)"
       />
-      <circle
-        :cx="dragPoint.x"
-        :cy="dragPoint.y"
-        r="1.25"
-        fill="#72a072"
-        :key="'color point' + dragPoint.x + ' ' + dragPoint.y"
-        v-for="dragPoint in dragPoints"
-      />
-      <circle
-        :cx="dragPoint.x"
-        :cy="dragPoint.y"
-        r="3"
-        fill="#00000000"
-        v-on:mousedown="startDrag($event, dragPoint.key)"
-        :key="dragPoint.x + ' ' + dragPoint.y"
-        v-for="dragPoint in dragPoints"
-      />
+      <!-- clickable points -->
+      <template
+        v-for="valuePoints in points"
+      >
+        <circle
+          :cx="valuePoint.x"
+          :cy="valuePoint.y"
+          r="3"
+          fill="#00000000"
+          :key="valuePoint.key + ' ' + valuePoint.value"
+          v-for="valuePoint in valuePoints"
+          v-on:mousedown="startDrag($event, valuePoint.key)"
+          v-on:touchstart.prevent="startTouchDrag($event, valuePoint.key)"
+        />
+      </template>
     </svg>
   </div>
 </template>
@@ -120,6 +106,7 @@
 export default {
   name: 'RadarInput',
   //props: ['intervalCount', 'width', 'pointCount'],
+  props: ['value'],
   data() {
     return {
       testLine: {
@@ -130,41 +117,11 @@ export default {
       },
       width: 20,
       intervalCount: 3,
-      values: [
-        {
-          key: 'FIRST',
-          value: 1,
-        },
-        {
-          key: 'SECOND',
-          value: 4,
-        },
-        {
-          key: 'THIRD',
-          value: 3,
-        },
-        {
-          key: 'FOURTH',
-          value: 2,
-        },
-        {
-          key: 'FIFTH',
-          value: 5,
-        },
-        {
-          key: 'SIXTH',
-          value: 3,
-        },
-        {
-          key: 'SEVENTH',
-          value: 4,
-        },
-      ],
     };
   },
   computed: {
     pointCount() {
-      return this.values.length;
+      return this.value.length;
     },
     intervals() {
       const degreeSeperation = 360 / this.pointCount;
@@ -229,7 +186,7 @@ export default {
       const degreeSeperation = 360 / this.pointCount;
       const lineSeperation = this.width / this.intervalCount;
       const angleAdjustment = 90;
-      const points = this.values.map((value, i) => {
+      const points = this.value.map((value, i) => {
         const degrees = ((degreeSeperation * i) - angleAdjustment) 
           * (Math.PI / 180);
         const hyp = value.value * lineSeperation;
@@ -242,7 +199,7 @@ export default {
     labels() {
       const degreeSeperation = 360 / this.pointCount;
       const angleAdjustment = 90;
-      const labels = this.values.map((value, i) => {
+      const labels = this.value.map((value, i) => {
         const degrees = ((degreeSeperation * i) - angleAdjustment) 
           * (Math.PI / 180);
         const hyp = this.width;
@@ -254,16 +211,18 @@ export default {
         let x = lineX;
         if (Math.round(lineX) < 0) {
           anchor = 'end';
-          x = lineX - .5;
+          x = lineX - 1.5;
         } else if (Math.round(lineX) > 0) {
           anchor = 'start';
-          x = lineX + .5;
+          x = lineX + 1.5;
         }
 
-        if (Math.round(lineY) > 0) {
+        if (Math.round(lineX) === 0 && Math.round(lineY) > 0) {
+          y = lineY + 5;
+        } else if (Math.round(lineY) > 0) {
           y = lineY + 4;
         } else if (Math.round(lineY) < 0) {
-          y = lineY - .5;
+          y = lineY - 1.5;
         } else {
           y = lineY + 2;
         }
@@ -282,7 +241,7 @@ export default {
       const degreeSeperation = 360 / this.pointCount;
       const lineSeperation = this.width / this.intervalCount;
       const angleAdjustment = 90;
-      const points = this.values.map((value, i) => {
+      const points = this.value.map((value, i) => {
         const degrees = ((degreeSeperation * i) - angleAdjustment) 
           * (Math.PI / 180);
         const hyp = value.value * lineSeperation;
@@ -299,7 +258,7 @@ export default {
   },
   methods: {
     changeValue(key, value) {
-      this.values[key].value = value;
+      this.value[key].value = value;
     },
     drag(evt) {
       if (this.dragging === undefined) {
@@ -308,7 +267,7 @@ export default {
 
       this.pt.x = evt.clientX;
       this.pt.y = evt.clientY;
-      // console.log({x: evt.clientX, y: evt.clientY});
+
       // The cursor point, translated into svg coordinates
       var cursorPt =  this.pt.matrixTransform(this.$refs.svg.getScreenCTM().inverse());
       console.log("(" + cursorPt.x + ", " + cursorPt.y + ")");
@@ -319,13 +278,12 @@ export default {
       const slope = (targetMeasurement.y) / (targetMeasurement.x);
       
       // Perpendicular line
-      const recipricalSlope = 1 / slope * -1;
+      const recipricalSlope = Math.round(slope) === 0 ? 1 : 1 / slope * -1;
       const perpendicularYInt = cursorPt.y - (cursorPt.x * recipricalSlope);
 
       // Intercept
       const xInt = perpendicularYInt / (slope - recipricalSlope);
       const YInt = slope * xInt;
-
 
       // Nearest value point
       const nearest = this.points
@@ -353,29 +311,25 @@ export default {
       this.testLine.y1 = nearest.y;
       this.testLine.x2 = 0;
       this.testLine.y2 = perpendicularYInt;
-      this.values[this.dragging].value = nearest.value;
-      // console.log({x: 0, y: perpendicularYInt});
+      this.value[this.dragging].value = nearest.value;
     },
-    dragStart(evt, valuePoint) {
-      // https://stackoverflow.com/questions/29261304/how-to-get-the-click-coordinates-relative-to-svg-element-holding-the-onclick-lis
-      this.pt.x = evt.clientX;
-      this.pt.y = evt.clientY;
-      // console.log({x: evt.clientX, y: evt.clientY});
-      // The cursor point, translated into svg coordinates
-      var cursorPt =  this.pt.matrixTransform(this.$refs.svg.getScreenCTM().inverse());
-      // console.log("(" + cursorPt.x + ", " + cursorPt.y + ")");
+    startTouchDrag(evt, key) {
+      this.startDrag(evt.touches[0], key);
+    },
+    touchMove(evt) {
+      this.drag(evt.touches[0]);
     },
     startDrag(evt, key) {
-      // console.log('start drag: ' + key);
       this.dragging = key;
       this.drag(evt);
     },
     stopDrag() {
-      // console.log('stop drag: ' + this.dragging);
       this.dragging = undefined;
     },
   },
   mounted() {
+    window.addEventListener("mouseup", this.stopDrag);
+    window.addEventListener("touchend", this.stopDrag);
     this.pt = this.$refs.svg.createSVGPoint();
   },
 }

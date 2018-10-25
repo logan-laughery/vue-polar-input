@@ -4,8 +4,11 @@
     <h3>
       Radar Input
     </h3>
-    <RadarInput>
+    <RadarInput v-model="values">
     </RadarInput>
+    <div>
+      {{JSON.stringify(values)}}
+    </div>
   </div>
 </template>
 
@@ -14,7 +17,45 @@ export default {
   name: 'HelloWorld',
   props: {
     msg: String
-  }
+  },
+  data() {
+    return {
+      values: [
+        {
+          key: 'FIRST',
+          value: 3,
+        },
+        {
+          key: 'SECOND',
+          value: 3,
+        },
+        {
+          key: 'THIRD',
+          value: 3,
+        },
+        {
+          key: 'FOURTH',
+          value: 3,
+        },
+        {
+          key: 'FIFTH',
+          value: 3,
+        },
+        {
+          key: 'SIXTH',
+          value: 3,
+        },
+        {
+          key: 'SEVENTH',
+          value: 3,
+        },
+        {
+          key: 'EIGTH',
+          value: 3,
+        },
+      ],
+    };
+  },
 }
 </script>
 
