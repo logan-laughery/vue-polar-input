@@ -4,7 +4,11 @@
     <h3>
       Radar Input
     </h3>
-    <RadarInput v-model="values">
+    <RadarInput
+      v-model="values"
+      :intervalCount="5"
+      class="blue-radar"
+    >
     </RadarInput>
     <div>
       {{JSON.stringify(values)}}
@@ -53,6 +57,10 @@ export default {
           key: 'EIGTH',
           value: 3,
         },
+        {
+          key: 'NINTH',
+          value: 3,
+        },
       ],
     };
   },
@@ -74,5 +82,14 @@ li {
 }
 a {
   color: #42b983;
+}
+.blue-radar .radar-highlight {
+  fill: #7972a0bf;
+  stroke: #7972a0bf;
+  stroke-width: .5px;
+}
+
+.blue-radar .radar-point {
+  fill: #7972a0bf;
 }
 </style>
