@@ -6,68 +6,41 @@
     v-on:touchmove="touchMove"
   >
     Radar Input Magic Goes Here
-    <svg width="100%" height="300px" viewBox="-40 -40 80 80" ref="svg">
+    <svg width="100%" viewBox="-40 -40 80 80" ref="svg">
       <polygon
+        class="radar-polygon"
         :points="interval"
-        fill="rgba(0, 0, 0, 0)"
-        stroke="#0000008a"
-        stroke-width=".25px"
         :key="interval"
         v-for="interval in intervals"
       />
       <line
+        class="radar-line"
         x1="0"
         y1="0"
         :x2="line.x"
         :y2="line.y"
-        stroke="#0000008a"
-        stroke-width=".25px"
         :key="i"
         v-for="(line, i) in lines"
       />
       <polygon
+        class="radar-highlight"
         :points="valuePolygonPoints"
-        fill="#72a072bf"
-        stroke="#72c772bf"
-        stroke-width=".5px"
       />
-      <!-- <foreignObject
-        :x="label.x"
-        :y="label.y"
-        width="20"
-        height="20"
-        :key="label.text"
-        v-for="label in labels"
-      >
-        <div style="font-size: 4px;">
-          {{label.text}}
-        </div>
-      </foreignObject> -->
       <text
+        class="radar-label"
         :x="label.x"
         :y="label.y"
         :text-anchor="label.anchor"
-        style="user-select: none"
-        font-size="4"
         :key="label.text"
         v-for="label in labels"
       >
         {{label.text}}
       </text>
-      <!-- test line -->
-      <!-- <line
-        :x1="testLine.x1"
-        :y1="testLine.y1"
-        :x2="testLine.x2"
-        :y2="testLine.y2"
-        stroke="blue"
-        stroke-width=".5px"
-      /> -->
       <circle
+        class="radar-point"
         :cx="dragPoint.x"
         :cy="dragPoint.y"
         r="1.25"
-        fill="#72a072"
         :key="'color point' + dragPoint.x + ' ' + dragPoint.y"
         v-for="dragPoint in dragPoints"
       />
@@ -105,64 +78,24 @@
 <script>
 export default {
   name: 'RadarInput',
-  //props: ['intervalCount', 'width', 'pointCount'],
-  props: ['value'],
+  props: ['value', 'intervalCount'],
   data() {
     return {
-      testLine: {
-        x1: 0,
-        y1: 0,
-        x2: 10,
-        y2: 10,
-      },
       width: 20,
-      intervalCount: 3,
     };
   },
   computed: {
     pointCount() {
       return this.value.length;
     },
-    intervals() {
+    degreeSeperation() {
+      return 360 / this.pointCount;
+    },
+    polygons() {    
       const degreeSeperation = 360 / this.pointCount;
       const lineSeperation = this.width / this.intervalCount;
       const angleAdjustment = 90;
-      const pointStrings = [...Array(this.intervalCount)]
-        .map((_, i) => {
-          const points = [...Array(this.pointCount)]
-            .map((_, j) => {
-              const degrees = ((degreeSeperation * j) - angleAdjustment) 
-                * (Math.PI / 180);
-              const hyp = this.width - (i*lineSeperation);
-
-              return `${Math.cos(degrees) * hyp},${Math.sin(degrees) * hyp}`;
-            });
-          return points.join(' ');
-        });
-      // debugger;
-      return pointStrings;
-    },
-    lines() {
-      const degreeSeperation = 360 / this.pointCount;
-      const angleAdjustment = 90;
-      const linePoints = [...Array(this.pointCount)]
-        .map((_, i) => {
-          const degrees = ((degreeSeperation * i) - angleAdjustment) 
-            * (Math.PI / 180);
-          const hyp = this.width;
-          return {
-            x: Math.cos(degrees) * hyp,
-            y: Math.sin(degrees) * hyp,
-          }
-        });
-
-      return linePoints;
-    },
-    points() {
-      const degreeSeperation = 360 / this.pointCount;
-      const lineSeperation = this.width / this.intervalCount;
-      const angleAdjustment = 90;
-      const valuePoints = [...Array(this.intervalCount)]
+      const polygons = [...Array(this.intervalCount)]
         .map((_, i) => {
           const points = [...Array(this.pointCount)]
             .map((_, j) => {
@@ -173,16 +106,42 @@ export default {
               return {
                 key: j,
                 value: this.intervalCount - i,
+                text: this.value[j].key,
                 x: Math.cos(degrees) * hyp,
-                y: Math.sin(degrees) * hyp
+                y: Math.sin(degrees) * hyp,
               };
             });
-          return points;
+
+          return {
+            points
+          };
         });
+
+      return polygons;
+    },
+    intervals() {
+      const pointStrings = this.polygons
+        .map((polygon) => {
+          const points = polygon.points
+            .map((point) => `${point.x},${point.y}`);
+          
+          return points.join(' ');
+        });
+
+      return pointStrings;
+    },
+    lines() {
+      const outerPolygon = this.polygons[0];
+      
+      return outerPolygon.points;
+    },
+    points() {
+      const valuePoints = this.polygons
+        .map((polygon) => polygon.points);
 
       return valuePoints;
     },
-    valuePolygonPoints() {
+    dragPoints() {
       const degreeSeperation = 360 / this.pointCount;
       const lineSeperation = this.width / this.intervalCount;
       const angleAdjustment = 90;
@@ -191,21 +150,27 @@ export default {
           * (Math.PI / 180);
         const hyp = value.value * lineSeperation;
 
-        return `${Math.cos(degrees) * hyp},${Math.sin(degrees) * hyp}`;
+        return {
+          key: i,
+          x: Math.cos(degrees) * hyp,
+          y: Math.sin(degrees) * hyp
+        };
       });
+
+      return points;
+    },
+    valuePolygonPoints() {
+      const points = this.dragPoints.map((point) => `${point.x},${point.y}`);
 
       return points.join(' ');
     },
     labels() {
-      const degreeSeperation = 360 / this.pointCount;
-      const angleAdjustment = 90;
-      const labels = this.value.map((value, i) => {
-        const degrees = ((degreeSeperation * i) - angleAdjustment) 
-          * (Math.PI / 180);
-        const hyp = this.width;
+      const outerPolygon = this.polygons[0];
 
-        const lineX = Math.cos(degrees) * hyp;
-        const lineY = Math.sin(degrees) * hyp
+      const labels = outerPolygon.points.map((point) => {
+        const lineX = point.x;
+        const lineY = point.y;
+
         let anchor = 'middle';
         let y = lineY;
         let x = lineX;
@@ -229,31 +194,13 @@ export default {
 
         return {
           anchor: anchor,
-          text: value.key,
+          text: point.text,
           x: x,
           y: y,
         }
       });
 
       return labels;
-    },
-    dragPoints() {
-      const degreeSeperation = 360 / this.pointCount;
-      const lineSeperation = this.width / this.intervalCount;
-      const angleAdjustment = 90;
-      const points = this.value.map((value, i) => {
-        const degrees = ((degreeSeperation * i) - angleAdjustment) 
-          * (Math.PI / 180);
-        const hyp = value.value * lineSeperation;
-
-        return {
-          key: i,
-          x: Math.cos(degrees) * hyp,
-          y: Math.sin(degrees) * hyp
-        };
-      });
-
-      return points;
     },
   },
   methods: {
@@ -270,7 +217,6 @@ export default {
 
       // The cursor point, translated into svg coordinates
       var cursorPt =  this.pt.matrixTransform(this.$refs.svg.getScreenCTM().inverse());
-      console.log("(" + cursorPt.x + ", " + cursorPt.y + ")");
 
       // https://math.stackexchange.com/questions/717746/closest-point-on-a-line-to-another-point
       // Measurement line
@@ -307,10 +253,6 @@ export default {
           distance: Number.MAX_SAFE_INTEGER
         });
 
-      this.testLine.x1 = nearest.x;      
-      this.testLine.y1 = nearest.y;
-      this.testLine.x2 = 0;
-      this.testLine.y2 = perpendicularYInt;
       this.value[this.dragging].value = nearest.value;
     },
     startTouchDrag(evt, key) {
@@ -336,4 +278,29 @@ export default {
 </script>
 
 <style>
+.radar-polygon {
+  fill: rgba(0, 0, 0, 0);
+  stroke: #0000008a;
+  stroke-width: .25px;
+}
+
+.radar-line {
+  stroke: #0000008a;
+  stroke-width: .25px;
+}
+
+.radar-highlight {
+  fill: #72a072bf;
+  stroke: #72c772bf;
+  stroke-width: .5px;
+}
+
+.radar-point {
+  fill: #72a072;
+}
+
+.radar-label {
+  user-select: none;
+  font-size: 4px;
+}
 </style>
