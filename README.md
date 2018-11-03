@@ -1,4 +1,5 @@
 # vue-radar-input
+![example](https://media.giphy.com/media/1etnzt6jWdD9mZdN2p/giphy.gif)
 
 ## Install / Setup
 Install with npm:
