@@ -5,7 +5,6 @@
     v-on:mousemove="drag"
     v-on:touchmove="touchMove"
   >
-    Radar Input Magic Goes Here
     <svg width="100%" viewBox="-40 -40 80 80" ref="svg">
       <polygon
         class="radar-polygon"
